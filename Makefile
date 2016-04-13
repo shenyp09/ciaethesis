@@ -29,6 +29,12 @@ endif
 
 .PHONY: all clean distclean dist thesis viewthesis shuji viewshuji doc viewdoc cls check FORCE_MAKE
 
+
+viewthesis: thesis
+	$(OPEN) $(THESISMAIN).pdf
+
+thesis: $(THESISMAIN).pdf
+
 all: doc thesis shuji
 
 cls: $(CLSFILES)
@@ -40,11 +46,6 @@ viewdoc: doc
 	$(OPEN) $(PACKAGE).pdf
 
 doc: $(PACKAGE).pdf
-
-viewthesis: thesis
-	$(OPEN) $(THESISMAIN).pdf
-
-thesis: $(THESISMAIN).pdf
 
 viewshuji: shuji
 	$(OPEN) $(SHUJIMAIN).pdf

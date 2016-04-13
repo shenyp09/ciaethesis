@@ -1123,7 +1123,7 @@
 %<*cls>
 \hyphenation{Thu-Thesis}
 \def\thuthesis{\textsc{ThuThesis}}
-\def\version{5.3.1}
+\def\version{0.0.1}
 
 \RequirePackage{kvoptions}
 \SetupKeyvalOptions{
@@ -1387,7 +1387,7 @@
 \RequirePackage{geometry}
 \geometry{
   a4paper, % 210 * 297mm
-  hcentering,
+  % hcentering,
   ignoreall,
   nomarginpar}
 \ifthu@bachelor
@@ -1400,7 +1400,10 @@
     footskip=17mm}
 \else
   \geometry{
-    left=30mm,
+    left=35mm,
+    right=30mm,
+    top=45mm,
+    bottom=40mm,
     headheight=5mm,
     headsep=5mm,
     textheight=237mm,
@@ -1606,7 +1609,8 @@
   \renewcommand{\footrulewidth}{0pt}}
 \fancypagestyle{thu@headings}{%
   \fancyhead{}
-  \fancyhead[C]{\wuhao\songti\leftmark}
+  \fancyhead[LE]{\wuhao\songti 中国原子能科学研究院\ifthu@doctor 博士 \else\ifthu@master 硕士 \fi\fi 学位论文}
+  \fancyhead[RO]{\wuhao\songti 中国原子能科学研究院\ifthu@doctor 博士 \else\ifthu@master 硕士 \fi\fi 学位论文}
   \fancyfoot{}
   \fancyfoot[C]{\wuhao\thepage}
   \renewcommand{\headrulewidth}{0.4pt}
@@ -2161,10 +2165,14 @@
 \thu@def@term{csupervisor}
 \thu@def@term{cassosupervisor}
 \thu@def@term{ccosupervisor}
+\thu@def@term{csupervisortitle}
+\thu@def@term{cassosupervisortitle}
+\thu@def@term{ccosupervisortitle}
 \thu@def@term{eauthor}
 \thu@def@term{esupervisor}
 \thu@def@term{eassosupervisor}
 \thu@def@term{ecosupervisor}
+\thu@def@term{cchair}
 %    \end{macrocode}
 % \end{macro}
 % \end{macro}
@@ -2199,6 +2207,9 @@
   \ClassWarning{thuthesis}
     {'\string\eaffil' is deprecated, please use '\string\edepartment' instead.}{}%
   \edepartment}
+
+\thu@def@term{cinstitute}
+\thu@def@term{cdeliver}
 %    \end{macrocode}
 % \end{macro}
 % \end{macro}
@@ -2229,6 +2240,8 @@
 %    \begin{macrocode}
 \thu@def@term{cdate}
 \thu@def@term{edate}
+\thu@def@term{csubmitdate}
+\thu@def@term{cdefensedate}
 %    \end{macrocode}
 % \end{macro}
 % \end{macro}
@@ -2244,6 +2257,7 @@
 \thu@def@term{id}
 \thu@def@term{udc}
 \thu@def@term{catalognumber}
+\thu@def@term{serial}
 \thu@def@term{cfirstdiscipline}
 \thu@def@term{cseconddiscipline}
 \thu@def@term{postdoctordate}
@@ -2430,8 +2444,9 @@
 %
 %    \begin{macrocode}
 %<*cls>
-\newcommand\thu@underline[2][6em]{\hskip1pt\underline{\hb@xt@ #1{\hss#2\hss}}\hskip3pt}
+\newcommand\thu@underline[2][6em]{\underline{\hb@xt@ #1{\hss#2\hss}}}
 \newlength{\thu@title@width}
+\newlength{\thu@title@longwidth}
 \newcommand{\thu@put@title}[2][\thu@title@width]{%
   \begin{CJKfilltwosides}[b]{#1}#2\end{CJKfilltwosides}}
 \def\thu@first@titlepage{%
@@ -2485,12 +2500,25 @@
   \end{center}}
 \newcommand{\thu@first@titlepage@other}{
   \begin{center}
-    \vspace*{-1.6cm}
+    \vspace*{-1.6cm}\vspace*{-8em}
     \parbox[b][2.4cm][t]{\textwidth}{%
       \ifthu@secret{\heiti\sanhao\thu@secretlevel\thu@secret@content}\else\rule{1cm}{0cm}\fi}
+      \setlength{\thu@title@width}{3em}
+      \setlength{\extrarowheight}{6pt}
+      \ifxetex % todo: ugly codes
+           \begin{tabular}{p{\thu@title@width}@{}l@{}lp{\thu@title@width}@{}l}
+         \else
+           \begin{tabular}{p{\thu@title@width}l@{}l@{}l@{}l}
+         \fi
+
+             \thu@put@title[3em]{\heiti 分类号} & ~\thu@underline[7em]{\thu@catalognumber} & \hspace*{13em} &\thu@put@title[3em]{\heiti 密级} &  ~\thu@underline[7em]{\thu@secretlevel}  \\
+             \thu@put@title[3em]{\heiti UDC} & ~\thu@underline[7em]{\thu@udc} & \hspace*{13em} &\thu@put@title[3em]{\heiti 编号} &  ~\thu@underline[7em]{\thu@serial}  \\
+           \end{tabular}
+    \vspace*{8em}
     \ifthu@bachelor
       \vskip0.45cm
-      {\includegraphics{tsinghua}}
+      % {\includegraphics{tsinghua}}
+      {\yihao\kaishu 中国原子能科学研究院}
       \par\vskip1.5cm
       {\xiaochu\heiti\ziju{0.5}\thu@bachelor@subtitle}
       \vskip2.2cm
@@ -2507,14 +2535,29 @@
       \CJKunderline*{\thu@ctitle}}%
       \vskip1.3cm
     \else
-      \vskip0.8cm
-      \parbox[t][9cm][t]{\paperwidth-8cm}{
-      \renewcommand{\baselinestretch}{1.3}
-      \begin{center}
-        \yihao[1.2]{\sffamily\heiti\thu@ctitle}\par%
-        \par\vskip 18bp%
-        \xiaoer[1]\textrm{\thu@apply}%
-      \end{center}}
+      \vskip0.45cm
+      % {\includegraphics{tsinghua}}
+      {\yihao\kaishu 中国原子能科学研究院}
+      \par\vskip0.5cm
+      \ifthu@master
+        {\xiaoyi\heiti 硕士学位论文}
+      \fi
+      \ifthu@doctor
+        {\xiaoyi\heiti 博士学位论文}
+      \fi
+      \vskip2.2cm
+      \noindent\heiti\xiaoer\thu@bachelor@title@pre\thu@title@sep
+      \parbox[t]{12cm}{%
+      \ignorespaces\yihao[1.55]%
+      \renewcommand{\CJKunderlinebasesep}{0.25cm}%
+      \renewcommand{\ULthickness}{1.3pt}%
+      \ifxetex
+        \xeCJKsetup{underline/format=\color{black}}%
+      \else
+        \def\CJKunderlinecolor{\color{black}}%
+      \fi
+      \CJKunderline*{\thu@ctitle\hfill}}%
+      \vskip1.3cm
     \fi
 %    \end{macrocode}
 %
@@ -2554,32 +2597,37 @@
         }}
     \else
       \vskip 5bp
-      \parbox[t][7.8cm][t]{\textwidth}{{\sanhao[1.5]
+      \parbox[t][7.8cm][t]{\textwidth}{{\sihao[1.5]
         \begin{center}\fangsong
           \setlength{\thu@title@width}{5em}
+          \setlength{\thu@title@longwidth}{6em}
           \setlength{\extrarowheight}{4pt}
           \ifxetex % todo: ugly codes
-            \begin{tabular}{p{\thu@title@width}@{}c@{\extracolsep{8pt}}l}
+            \begin{tabular}{m{6em}<{\centering} m{6em}<{\centering} m{6em}<{\centering} m{9em}<{\centering}}
           \else
-            \begin{tabular}{p{\thu@title@width}c@{\extracolsep{4pt}}l}
+            \begin{tabular}{p{\thu@title@width}c@{}c@{}c}
           \fi
-              \thu@put@title{\thu@department@title}  & \thu@title@sep
-                & {\ziju{0.1875}\thu@cdepartment}\\
-              \thu@put@title{\thu@major@title}       & \thu@title@sep
-                & {\ziju{0.1875}\thu@cmajor}\\
-              \thu@put@title{\thu@author@title}      & \thu@title@sep
-                & {\ziju{0.6875}\thu@cauthor}\\
-              \thu@put@title{\thu@supervisor@title}  & \thu@title@sep
-                & {\ziju{0.6875}\thu@csupervisor}\\
+                \thu@put@title[6em]{\thu@author@title}  & \multicolumn{3}{c}{\thu@underline[22.6em]{\ziju{0.2}\thu@cauthor}} \\
+              \thu@put@title[6em]{\thu@supervisor@title}  & \multicolumn{3}{c}{\thu@underline[22.6em]{\ziju{0.2}\thu@csupervisor\hspace*{0.6em}\thu@csupervisortitle}} \\
               \ifx\thu@cassosupervisor\@empty\else
-                \thu@put@title{\thu@assosuper@title} & \thu@title@sep
-                & {\ziju{0.6875}\thu@cassosupervisor}\\
+                \thu@put@title[6em]{\thu@assosuper@title} & \multicolumn{3}{c}{\thu@underline[22.6em]{\ziju{0.2}\thu@cassosupervisor\hspace*{0.6em}\thu@cassosupervisortitle}} \\
               \fi
-              \ifx\thu@ccosupervisor\@empty\else
-                \hfill\makebox[0pt][r]{\thu@cosuper@title} & \thu@title@sep
-                & {\ziju{0.6875}\thu@ccosupervisor}\\
-              \fi
+              \thu@put@title[6em]{申请学位级别} & \thu@underline[6em]{\thu@cdegree} & \thu@put@title[6em]{专业名称} & \thu@underline[8.9em]{\thu@cmajor} \\
+              \thu@put@title[6em]{论文提交日期} & \thu@underline[6em]{\thu@csubmitdate} & \thu@put@title[6em]{论文答辩日期} & \thu@underline[8.9em]{\thu@cdefensedate} \\
+              \thu@put@title[6em]{培养单位} & \multicolumn{3}{c}{\thu@underline[22.6em]{\thu@cinstitute}} \\
+              \thu@put@title[6em]{学位授予单位} & \multicolumn{3}{c}{\thu@underline[22.6em]{\thu@cdeliver}} \\
+              
+              % \thu@put@title{\thu@department@title}  & \multicolumn{3}{c}{\ziju{0.1875}\thu@cdepartment} \\
+              % \thu@put@title{\thu@major@title}       & \thu@title@sep & {\ziju{0.1875}\thu@cmajor}       & \\
+              % \thu@put@title{\thu@author@title}      & \thu@title@sep & {\ziju{0.6875}\thu@cauthor}      & \\
+              
+              % \ifx\thu@ccosupervisor\@empty\else
+              %   \hfill\makebox[0pt][r]{\thu@cosuper@title} & \thu@title@sep & {\ziju{0.6875}\thu@ccosupervisor} & \\
+              % \fi
             \end{tabular}
+            \begin{flushright}
+               答辩委员会主席\hspace*{1em}\thu@underline[9.5em]{\thu@cchair}\hspace*{-0.5em}
+            \end{flushright}
         \end{center}}}
       \fi
 %    \end{macrocode}
@@ -2588,11 +2636,11 @@
 % 本科：论文成文打印的日期用阿拉伯数字，采用小四号宋体
 % \changes{v4.4.3}{2008/06/09}{修改本科生论文封面日期格式以符合新样例。}
 %    \begin{macrocode}
-     \begin{center}
-       {\ifthu@bachelor\vskip-1.0cm\hskip-1.2cm\xiaosi\else%
-         \vskip-0.5cm\sanhao\fi%
-         \songti\thu@cdate}
-     \end{center}
+     % \begin{center}
+     %   {\ifthu@bachelor\vskip-1.0cm\hskip-1.2cm\xiaosi\else%
+     %     \vskip-0.5cm\sanhao\fi%
+     %     \songti\thu@cdate}
+     % \end{center}
     \end{center}} % end of titlepage
 %</cls>
 %    \end{macrocode}
@@ -2737,10 +2785,10 @@
 %
 % 研究生论文需要增加英文封面
 %    \begin{macrocode}
-    \ifthu@bachelor\relax\else
-      \ifthu@postdoctor\relax\else
-        \cleardoublepage\thu@engcover
-    \fi\fi
+    % \ifthu@bachelor\relax\else
+    %   \ifthu@postdoctor\relax\else
+    %     \cleardoublepage\thu@engcover
+    % \fi\fi
 %    \end{macrocode}
 %
 % 授权说明
@@ -2749,23 +2797,23 @@
 % \changes{v4.6}{2011/05/29}{博士后报告无授权说明。}
 % \changes{v5.0.0}{2015/06/05}{使用 \pkg{pdfpages} 宏包支持本硕博论文授权说明扫描版(\#36)。}
 %    \begin{macrocode}
-    \ifthu@postdoctor\relax\else%
-      \ifthu@bachelor\clearpage\else\cleardoublepage\fi%
-      \IfNoValueTF{#1}{%
-        \ifthu@bachelor\thu@authorization@mk\else%
-          \begin{list}{}{%
-            \topsep\z@%
-            \listparindent\parindent%
-            \parsep\parskip%
-            \setlength{\leftmargin}{0.9mm}%
-            \setlength{\rightmargin}{0.9mm}}%
-          \item[]\thu@authorization@mk%
-          \end{list}%
-        \fi%
-      }{%
-        \includepdf{#1}%
-      }%
-    \fi
+    % \ifthu@postdoctor\relax\else%
+    %   \ifthu@bachelor\clearpage\else\cleardoublepage\fi%
+    %   \IfNoValueTF{#1}{%
+    %     \ifthu@bachelor\thu@authorization@mk\else%
+    %       \begin{list}{}{%
+    %         \topsep\z@%
+    %         \listparindent\parindent%
+    %         \parsep\parskip%
+    %         \setlength{\leftmargin}{0.9mm}%
+    %         \setlength{\rightmargin}{0.9mm}}%
+    %       \item[]\thu@authorization@mk%
+    %       \end{list}%
+    %     \fi%
+    %   }{%
+    %     \includepdf{#1}%
+    %   }%
+    % \fi
   \end{titlepage}
 %    \end{macrocode}
 %
@@ -2809,7 +2857,7 @@
 %    \begin{macrocode}
 \newcommand{\thu@makeabstract}{%
   \ifthu@bachelor\clearpage\else\cleardoublepage\fi
-  \thu@chapter*[]{\cabstractname} % no tocline
+  \thu@chapter*{\cabstractname} % tocline
   \ifthu@bachelor
     \pagestyle{thu@plain}
   \else
