@@ -1,4 +1,4 @@
-# What's ThuThesis?
+# What's ThuThesis?s
 ThuThesis is a LaTeX thesis template package for Tsinghua University supporting from bachelor, master, doctor dissertations to post-doc report. Since the users of this package are supposed to be Chinese or those understand Chinese, the following of this file and all other documents are written in Chinese only.
 
 # ThuThesis是什么？
